@@ -1,171 +1,41 @@
 # student-management-system
-📖 Abstract:
-The Student Management System (SMS) is a software application developed to simplify and automate the process of managing student information in an educational institution. This project helps administrators and faculty to store, access, modify, and analyze student records in a streamlined and efficient manner.
+Student Management System using Flask and SQLite
 
-🧱 Table of Contents:
-Introduction
+from flask import Flask, render_template, request, redirect, url_for import sqlite3
 
-Objectives
+app = Flask(name)
 
-Existing System
+Database Setup
 
-Proposed System
+def init_db(): conn = sqlite3.connect('students.db') c = conn.cursor() c.execute('''CREATE TABLE IF NOT EXISTS students ( id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, roll_no TEXT UNIQUE NOT NULL, course TEXT, marks INTEGER )''') conn.commit() conn.close()
 
-System Requirements
+Home Page
 
-System Design
+@app.route('/') def index(): conn = sqlite3.connect('students.db') c = conn.cursor() c.execute("SELECT * FROM students") students = c.fetchall() conn.close() return render_template('index.html', students=students)
 
-Modules Description
+Add Student
 
-Database Design
+@app.route('/add', methods=['POST']) def add_student(): name = request.form['name'] roll_no = request.form['roll_no'] course = request.form['course'] marks = request.form['marks']
 
-Implementation
+conn = sqlite3.connect('students.db')
+c = conn.cursor()
+c.execute("INSERT INTO students (name, roll_no, course, marks) VALUES (?, ?, ?, ?)",
+          (name, roll_no, course, marks))
+conn.commit()
+conn.close()
+return redirect(url_for('index'))
 
-Testing
+Delete Student
 
-Advantages
+@app.route('/delete/int:id') def delete_student(id): conn = sqlite3.connect('students.db') c = conn.cursor() c.execute("DELETE FROM students WHERE id=?", (id,)) conn.commit() conn.close() return redirect(url_for('index'))
 
-Limitations
+Update Student
 
-Future Scope
+@app.route('/update/int:id', methods=['GET', 'POST']) def update_student(id): conn = sqlite3.connect('students.db') c = conn.cursor() if request.method == 'POST': name = request.form['name'] roll_no = request.form['roll_no'] course = request.form['course'] marks = request.form['marks'] c.execute("UPDATE students SET name=?, roll_no=?, course=?, marks=? WHERE id=?", (name, roll_no, course, marks, id)) conn.commit() conn.close() return redirect(url_for('index')) else: c.execute("SELECT * FROM students WHERE id=?", (id,)) student = c.fetchone() conn.close() return render_template('update.html', student=student)
 
-Conclusion
+if name == 'main': init_db() app.run(debug=True)
 
-References
 
-1. Introduction
-Managing data manually in educational institutions leads to errors, duplication, and inefficiency. A Student Management System digitizes this process using a centralized database and user-friendly interface.
 
-2. Objectives
-To maintain student records securely.
 
-To enable quick access and editing of student data.
-
-To generate reports like attendance, grades, etc.
-
-To simplify admission and fee processes.
-
-3. Existing System
-Manual registers or Excel sheets are typically used. This results in:
-
-Time-consuming operations.
-
-Human errors.
-
-Data redundancy.
-
-Difficult search and retrieval.
-
-4. Proposed System
-A web/mobile application with CRUD functionalities.
-
-Centralized database (e.g., MySQL/PostgreSQL).
-
-Admin and student login access.
-
-Automated report generation.
-
-5. System Requirements
-Software:
-
-Frontend: HTML, CSS, JavaScript (React or Angular)
-
-Backend: Python (Flask/Django) or Node.js
-
-Database: MySQL / SQLite
-
-Hardware:
-
-Minimum 4 GB RAM
-
-Intel i3 or higher processor
-
-6. System Design
-Architecture:
-
-Three-tier architecture: UI, Business Logic, and Database Layer.
-
-Use Case Diagram
-
-Login
-
-Add/Edit/Delete Student
-
-Generate Reports
-
-Manage Attendance
-
-View Grades
-
-7. Modules Description
-a. Login Module:
-Secure login for Admin, Teacher, and Student roles.
-
-b. Student Module:
-Add, update, delete, and view student details.
-
-c. Attendance Module:
-Mark and retrieve attendance per class.
-
-d. Grades Module:
-Record subject-wise marks and compute average.
-
-e. Report Module:
-Generate performance reports and fee records.
-
-8. Database Design
-Tables: Students, Teachers, Courses, Attendance, Results, Fees
-
-Each student has a unique ID.
-
-Relationships: One-to-many (Student → Attendance, Results)
-
-9. Implementation
-Technologies used: HTML/CSS + Django + SQLite.
-
-Screens: Login, Dashboard, Student CRUD, Attendance, Grades, Reports.
-
-Hosted on local server (can extend to cloud).
-
-10. Testing
-Unit Testing for each module.
-
-Integration Testing between modules.
-
-User Acceptance Testing (UAT).
-
-11. Advantages
-Reduced paperwork.
-
-Accurate data management.
-
-Time-saving and efficient.
-
-Secure and role-based access.
-
-12. Limitations
-Requires internet and device.
-
-Need for initial training.
-
-Limited offline access.
-
-13. Future Scope
-Integration with biometric attendance.
-
-Mobile app version.
-
-Real-time parent notifications.
-
-AI-based performance analysis.
-
-14. Conclusion
-The Student Management System improves data handling in educational institutions by offering a digital, centralized, and user-friendly solution. It enhances accuracy, accessibility, and efficiency in managing student data.
-
-15. References
-Django Documentation (https://docs.djangoproject.com)
-
-W3Schools HTML, CSS, JS Tutorials
-
-MySQL Reference Manual
 
